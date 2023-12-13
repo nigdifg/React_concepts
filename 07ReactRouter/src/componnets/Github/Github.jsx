@@ -12,7 +12,6 @@ function Github() {
                 setData(data)
             })
         },[])
-
   return (
     <>
     <div className='m-4 bg-gray-600 text-teal-50 p-4 text-3xl'>
