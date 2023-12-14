@@ -1,23 +1,77 @@
-import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import {removeTodo} from '../features/todo/todoSlice'
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { removeTodo, updateTodo } from '../features/todo/todoSlice';
 
 function Todos() {
-    const todos = useSelector(state => state.todos)
-    const dispatch = useDispatch()
+  const todos = useSelector((state) => state.todos);
+  const dispatch = useDispatch();
+
+  // Use state to track the edited text and the id of the todo being edited
+  const [editedText, setEditedText] = useState('');
+  const [editingTodoId, setEditingTodoId] = useState(null);
+
+  const handleToggleEdit = (id) => {
+    // Toggle the editing state and set the id of the todo being edited
+    setEditingTodoId((prevId) => (prevId === id ? null : id));
+
+    // If editing is toggled off, clear the edited text
+    if (editingTodoId === id) {
+      setEditedText('');
+    }
+  };
+
+  const handleUpdateTodo = (id) => {
+    // If edited text is provided, dispatch the updateTodo action
+    if (editedText.trim() !== '') {
+      dispatch(updateTodo({ id, newText: editedText }));
+
+      // Reset the state after updating
+      setEditedText('');
+      setEditingTodoId(null);
+    }
+  };
 
   return (
     <>
-    <div>Todos</div>
-    <ul className="list-none">
+      <div>Todos</div>
+      <ul className="list-none">
         {todos.map((todo) => (
           <li
             className="mt-4 flex justify-between items-center bg-zinc-800 px-4 py-2 rounded"
             key={todo.id}
           >
-            <div className='text-white'>{todo.text}</div>
+            {/* Display the text or the input field based on the editing state */}
+            {editingTodoId === todo.id ? (
+              <div>
+                <input
+                  type="text"
+                  value={editedText || todo.text} 
+                  onChange={(e) => setEditedText(e.target.value)}
+                  placeholder="New text"
+                  className="mr-2 p-1"
+                />
+                <button
+                  onClick={() => handleUpdateTodo(todo.id)}
+                  className="text-white bg-blue-500 border-0 py-1 px-4 focus:outline-none hover:bg-blue-600 rounded text-md"
+                >
+                  Update
+                </button>
+              </div>
+            ) : (
+              <div className="text-white">{todo.text}</div>
+            )}
+
+            {/* Button for toggling edit state */}
             <button
-             onClick={() => dispatch(removeTodo(todo.id))}
+              onClick={() => handleToggleEdit(todo.id)}
+              className="text-white bg-yellow-500 border-0 py-1 px-3 focus:outline-none hover:bg-yellow-600 rounded text-md"
+            >
+              Edit
+            </button>
+
+            {/* Button for removing todo */}
+            <button
+              onClick={() => dispatch(removeTodo(todo.id))}
               className="text-white bg-red-500 border-0 py-1 px-4 focus:outline-none hover:bg-red-600 rounded text-md"
             >
               <svg
@@ -39,7 +93,7 @@ function Todos() {
         ))}
       </ul>
     </>
-  )
+  );
 }
 
-export default Todos
+export default Todos;
